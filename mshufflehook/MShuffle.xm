@@ -3,6 +3,8 @@
 static BOOL Enabled;
 static int modeOption;
 
+static __strong MPMusicPlayerController* MPcontroller = [MPMusicPlayerController iPodMusicPlayer];
+
 %hook MPCMediaPlayerLegacyPlayer
 - (void)_playbackStateChangedNotification:(NSNotification*)notification
 {
@@ -17,6 +19,32 @@ static int modeOption;
 					[self clearPlaybackQueueWithCompletion:^{
 						if(modeOption == 1) {
 							[self performCommandEvent:nil completion:nil];
+						} else if(modeOption == 2) {
+							MPMediaItem* currentMediaItm = [self currentItem];
+							NSString* mediaIdenOld = [[NSString stringWithFormat:@"%@%@", [currentMediaItm title], [currentMediaItm albumName]] copy];
+							NSMutableArray* itemsMut = [[NSMutableArray alloc] init];
+							MPMediaQuery *myPlaylistsQuery = [MPMediaQuery songsQuery];
+							MPMediaItem* itmToPlay = nil;
+							for(MPMediaItemCollection *playlist in [myPlaylistsQuery collections]) {
+								for (MPMediaItem *song in [playlist items]) {
+									[itemsMut addObject:song];
+									if(!itmToPlay) {
+										NSString* mediaIdenNow = [NSString stringWithFormat:@"%@%@", [song valueForProperty:MPMediaItemPropertyTitle], [song valueForProperty:MPMediaItemPropertyAlbumTitle]];
+										if([mediaIdenNow isEqualToString:mediaIdenOld]) {
+											itmToPlay = song;
+										}
+									}
+								}
+							}
+							if(itmToPlay && [itmToPlay respondsToSelector:@selector(dateAdded)]) {
+								NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"dateAdded" ascending:NO];
+								[itemsMut sortUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+								MPMediaItemCollection* mutPlay = [[MPMediaItemCollection alloc] initWithItems:itemsMut];
+								[MPcontroller setQueueWithItemCollection:mutPlay];
+								[MPcontroller setNowPlayingItem:itemsMut[[itemsMut indexOfObject:itmToPlay]+1]];
+								[MPcontroller prepareToPlay];
+								[MPcontroller play];
+							}
 						}
 					}];
 				}

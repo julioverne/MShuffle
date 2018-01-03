@@ -39,7 +39,7 @@
 											  edit:Nil];
 		[spec setProperty:@"modeOption" forKey:@"key"];
 		[spec setProperty:@0 forKey:@"default"];
-		[spec setValues:@[@0, @1] titles:@[@"Play To Shuffle", @"Auto Shuffle", ]];
+		[spec setValues:@[@0, @1, @2] titles:@[@"Play To Shuffle", @"Auto Shuffle", @"Auto Play Recent Added Order",]];
 		[specifiers addObject:spec];
 		
 		
@@ -76,7 +76,7 @@
 		[spec setProperty:[UIImage imageWithContentsOfFile:[[self bundle] pathForResource:@"twitter" ofType:@"png"]] forKey:@"iconImage"];
         [specifiers addObject:spec];
 		spec = [PSSpecifier emptyGroupSpecifier];
-        [spec setProperty:@"MShuffle © 2017" forKey:@"footerText"];
+        [spec setProperty:@"MShuffle © 2018" forKey:@"footerText"];
         [specifiers addObject:spec];
 		_specifiers = [specifiers copy];
 	}
